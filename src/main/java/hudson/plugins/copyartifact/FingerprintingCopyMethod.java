@@ -78,6 +78,14 @@ public class FingerprintingCopyMethod extends Copier {
             DigestOutputStream out =new DigestOutputStream(d.write(),md5);
             try {
                 s.copyTo(out);
+            } catch (java.io.InterruptedIOException x) {
+                    try {
+                        Thread.sleep(5000);                 //1000 milliseconds is one second.
+                    } catch(InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                    out.close();
+                    throw new IOException("Failed to copy "+s+" to "+d+" becuase of unexpected job termination",x);
             } finally {
                 out.close();
             }
@@ -107,7 +115,7 @@ public class FingerprintingCopyMethod extends Copier {
                 fingerprints.put(s.getName(), digest);
             }
         } catch (IOException e) {
-            throw new IOException2("Failed to copy "+s+" to "+d,e);
+            throw new IOException("Failed to copy "+s+" to "+d,e);
         }
     }
 
